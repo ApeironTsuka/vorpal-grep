@@ -1,16 +1,15 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const glob = require('glob');
-const fsAutocomplete = require('vorpal-autocomplete-fs');
+import fs from 'node:fs';
+import path from 'node:path';
+import glob from 'glob';
+import fsAutocomplete from '@ApeironTsuka/vorpal-autocomplete-fs';
 
 let chalk;
 
 const grep = {
 
   exec(args, options, cb) {
-    const self = this;
     cb = cb || function () {};
     args = args || {
       stdin: []
@@ -22,61 +21,60 @@ const grep = {
     }
     const pattern = new RegExp(`(${wholeWords}${args.pattern}${wholeWords})`, regopts);
 
-    if (options['max-count'] && isNaN(options['max-count'])) {
-      self.log('grep: invalid max count');
+    if ((options['max-count']) && (isNaN(options['max-count']))) {
+      this.log('grep: invalid max count');
       cb();
       return;
     }
 
-    fetch(args.files, args.stdin, options, function (err, stdin, logs) {
-      /* istanbul ignore next */
+    fetch(args.files, args.stdin, options, (err, stdin, logs) => {
       if (err) {
-        self.log(chalk.red(err));
+        this.log(chalk.red(err));
         cb(err);
         return;
       }
 
       if (options.messages === undefined) {
-        for (let i = 0; i < logs.length; ++i) {
-          self.log(logs[i]);
+        for (let i = 0, l = logs.length; i < l; i++) {
+          this.log(logs[i]);
         }
       }
 
       const uniques = uniqFiles(stdin);
 
-      for (let i = 0; i < stdin.length; ++i) {
+      for (let i = 0, l = stdin.length; i < l; i++) {
         let maxCounter = 0;
         let bytes = 0;
         if (stdin[i][0] === undefined) {
           continue;
         }
-        for (let j = 0; j < stdin[i][0].length; ++j) {
+        for (let j = 0, jl = stdin[i][0].length; j < jl; j++) {
           const line = String(stdin[i][0][j]);
           const match = line.match(pattern);
           const offset = bytes;
           let result;
           bytes += line.length + 1;
-          if (match && options['invert-match'] === undefined) {
+          if ((match) && (options['invert-match'] === undefined)) {
             result = line.replace(pattern, chalk.red('$1'));
-          } else if (match === null && options['invert-match'] === true) {
+          } else if ((match === null) && (options['invert-match'] === true)) {
             result = line;
           }
-          if (options['byte-offset'] && result !== undefined) {
+          if ((options['byte-offset']) && (result !== undefined)) {
             result = `${chalk.green(offset)}${chalk.cyan(':')}${result}`;
           }
-          if (options['line-number'] && result !== undefined) {
+          if ((options['line-number']) && (result !== undefined)) {
             result = `${chalk.green(j + 1)}${chalk.cyan(':')}${result}`;
           }
-          if ((uniques.length > 1 || options['with-filename']) && result !== undefined && options.filename === undefined) {
+          if (((uniques.length > 1) || (options['with-filename'])) && (result !== undefined) && (options.filename === undefined)) {
             result = `${chalk.magenta(stdin[i][1] || 'stdin')}${chalk.cyan(':') + result}`;
           }
           if (result !== undefined) {
             maxCounter++;
-            if (options['max-count'] && maxCounter > options['max-count']) {
+            if ((options['max-count']) && (maxCounter > options['max-count'])) {
               continue;
             }
-            if (options.silent === undefined && options.quiet === undefined) {
-              self.log(result);
+            if ((options.silent === undefined) && (options.quiet === undefined)) {
+              this.log(result);
             }
           }
         }
@@ -86,7 +84,7 @@ const grep = {
   }
 };
 
-module.exports = function (vorpal) {
+export default function (vorpal) {
   if (vorpal === undefined) {
     return grep;
   }
@@ -118,7 +116,7 @@ function uniqFiles(stdin) {
   const mem = {};
   const result = [];
   let count = 0;
-  for (let i = 0; i < stdin.length; ++i) {
+  for (let i = 0, l = stdin.length; i < l; i++) {
     if (mem[stdin[i][1]] === undefined) {
       count++;
       mem[stdin[i][1]] = true;
@@ -130,28 +128,27 @@ function uniqFiles(stdin) {
 
 function fetch(files, stdin, options, cb) {
   files = files || [];
-  stdin = (stdin === undefined) ? [] : [stdin];
+  stdin = (stdin === undefined) ? [] : [ stdin ];
   const logs = [];
   expand(files, options, function (err, f) {
-    /* istanbul ignore next */
     if (err) {
       cb(err);
       return;
     }
 
-    if (!(f.length === 0 && files.length > 0)) {
+    if (!((f.length === 0) && (files.length > 0))) {
       files = f;
     }
 
-    for (let i = 0; i < files.length; ++i) {
+    for (let i = 0, l = files.length; i < l; i++) {
       try {
         const stat = fs.statSync(files[i]);
         const parts = path.parse(files[i]);
         if (stat.isDirectory()) {
           logs.push(`grep: ${files[i]}: Is a directory`);
           files[i] = undefined;
-        } else if (options.include !== undefined && matches(parts.base, options.include) || options.include === undefined) {
-          files[i] = [String(fs.readFileSync(path.normalize(files[i]), 'utf8')).split('\n'), files[i]];
+        } else if ((options.include !== undefined) && (matches(parts.base, options.include)) || (options.include === undefined)) {
+          files[i] = [ String(fs.readFileSync(path.normalize(files[i]), 'utf8')).split('\n'), files[i] ];
         } else {
           files[i] = undefined;
         }
@@ -161,14 +158,14 @@ function fetch(files, stdin, options, cb) {
       }
     }
 
-    for (let i = 0; i < stdin.length; ++i) {
+    for (let i = 0, l = stdin.length; i < l; i++) {
       stdin[i] = String(stdin[i]).split('\n');
     }
 
     const agg = files.length < 1 ? [stdin] : files;
     const final = [];
 
-    for (let i = 0; i < agg.length; ++i) {
+    for (let i = 0, l = agg.length; i < l; i++) {
       if (agg[i] !== undefined) {
         final.push(agg[i]);
       }
@@ -185,11 +182,11 @@ function expand(list, options, cb) {
   let back = false;
   const handler = function handler(err) {
     done++;
-    if (done >= total && !back) {
+    if ((done >= total) && (!back)) {
       back = true;
 
       let fnl = [];
-      for (let i = 0; i < files.length; ++i) {
+      for (let i = 0, l = files.length; i < l; i++) {
         const stat = fs.statSync(files[i]);
 
         if (stat.isDirectory()) {
@@ -204,7 +201,6 @@ function expand(list, options, cb) {
         }
       }
       cb(undefined, fnl);
-      /* istanbul ignore next */
     } else if (err && !back) {
       back = true;
       cb(err, []);
@@ -221,7 +217,7 @@ function expand(list, options, cb) {
     handler(err);
   }
 
-  for (let i = 0; i < total; ++i) {
+  for (let i = 0; i < total; i++) {
     glob(list[i], {}, prehandler);
   }
 }
@@ -240,7 +236,7 @@ function matches(str, rule) {
  */
 
 function walkDirRecursive(arr, currentDirPath) {
-  fs.readdirSync(currentDirPath).forEach(function (name) {
+  fs.readdirSync(currentDirPath).forEach((name) => {
     const filePath = path.join(currentDirPath, name);
     const stat = fs.statSync(filePath);
     if (stat.isDirectory()) {

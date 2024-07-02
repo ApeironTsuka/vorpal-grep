@@ -1,28 +1,28 @@
 # Vorpal - Grep
 
-[![Build Status](https://travis-ci.org/vorpaljs/vorpal-grep.svg)](https://travis-ci.org/vorpaljs/vorpal-grep)
-[![Coverage Status](https://coveralls.io/repos/vorpaljs/vorpal-grep/badge.svg?branch=master)](https://coveralls.io/r/vorpaljs/vorpal-grep?branch=master)
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
 
-A 100% Javascript (ES2015) implementation of the [grep](https://en.wikipedia.org/wiki/Grep) command.
+A 100% Javascript (ES2017) implementation of the [grep](https://en.wikipedia.org/wiki/Grep) command.
 
-A [Vorpal.js](https://github.com/dthree/vorpal) extension, `vorpal-grep` lets you grep content in a Vorpal environment!
+A [Vorpal.js](https://github.com/ApeironTsuka/vorpal) extension, `vorpal-grep` lets you grep content in a Vorpal environment!
 
 Letter-perfect POSIX implementation, 31 tests, 100% coverage.
 
 ### Installation
 
 ```bash
-npm install vorpal-grep
-npm install vorpal
+npm install @ApeironTsuka/vorpal-grep
+npm install @ApeironTsuka/vorpal
 ```
 
 ### Getting Started
 
 ```js
-const vorpal = require('vorpal')();
-const hn = require('vorpal-hacker-news');
-const grep = require('vorpal-grep');
+import Vorpal from '@ApeironTsuka/vorpal';
+import hn from '@ApeironTsuka/vorpal-hacker-news';
+import grep from '@ApeironTsuka/vorpal-grep';
+
+const vorpal = new Vorpal();
 
 vorpal
   .delimiter('node~$')
